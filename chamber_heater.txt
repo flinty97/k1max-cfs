@@ -1,0 +1,78 @@
+[mcu micro4]
+serial: /dev/serial/by-id/usb-Klipper_rp2040_E66260879742382E-if00  # use ID for your mcu
+restart_method: command
+
+[temperature_sensor micro4_temp]
+sensor_type: temperature_mcu
+sensor_mcu: micro4
+min_temp: 0
+max_temp: 100
+
+[temperature_sensor chamber_heater_temp]
+sensor_type: Generic 3950
+sensor_pin: micro4:gpio28
+min_temp: 0
+max_temp: 125   # CHANGE TO YOUR PREFERENCE
+
+
+[temperature_sensor heater_internal_temp] # SAFETY SENSOR WILL SHUTDOWN KLIPPER
+sensor_type: Generic 3950
+sensor_pin: micro4:gpio29
+min_temp: 0
+max_temp: 125    # CHANGE TO YOUR PREFERENCE - DONT PUT UNDER 110
+
+[heater_generic chamber_heater]   ####### IMPORTANT YOU NEED TO ADD THE [heater_generic chamber_heater] section to printer.cfg file to save the PID CHAMBER HEATER MACROS
+heater_pin: micro4:gpio20
+max_power: 1.0
+sensor_type: Generic 3950
+sensor_pin: micro4:gpio20
+control: watermark
+control = pid
+pid_Kp= 63.418
+pid_Ki= 1.342
+pid_Kd= 749.125
+min_temp: -100
+max_temp: 75
+gcode_id: C
+
+[heater_fan heater_chamber_fan]
+pin: micro4:gpio17
+max_power: 1.0
+#fan_speed: 0.75 # CHANGE TO YOUR PREFERENCE
+shutdown_speed: 0.0
+kick_start_time: 5.0
+cycle_time: 0.01
+off_below: 0.1
+hardware_pwm: false
+heater: chamber_heater
+heater_temp: 40.0 # fan will turn off below this level - CHANGE TO YOUR PREFERENCE
+
+
+[verify_heater chamber_heater]
+max_error: 400
+check_gain_time:600
+hysteresis: 5
+heating_gain: 2
+
+[gcode_macro M141]
+gcode:
+    SET_HEATER_TEMPERATURE HEATER=chamber_heater TARGET={params.S|default(0)}
+
+[gcode_macro M191]
+gcode:
+    {% set s = params.S|float %}
+    {% if s == 0 %}
+        # If target temperature is 0, do nothing
+        M117 Chamber heating cancelled
+    {% else %}
+        SET_HEATER_TEMPERATURE HEATER=chamber_heater TARGET={s}
+        # Orca: uncomment the following line if you want to use heat bed to assist chamber heating
+        M140 S90
+        TEMPERATURE_WAIT SENSOR="heater_generic chamber_heater" MINIMUM={s-1} MAXIMUM={s+1}
+        M117 Chamber at target temperature
+    {% endif %}
+
+[gcode_macro PID_CALIBRATE_CHAMBER_HEATER]
+description: Chamber heater Pid Calibrate
+gcode:
+  PID_CALIBRATE HEATER=chamber_heater TARGET={params.CHAMBER_TEMP|default(50)}
