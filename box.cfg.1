@@ -11,7 +11,7 @@ filament_sensor:filament_sensor_2
 pre_cut_pos_x:38#48.0#223.8
 pre_cut_pos_y:230.0#200
 cut_pos_x:38#48.0#223.8
-cut_pos_y:304.7#302
+cut_pos_y:306#302
 cut_pos_offset:1.3
 #middle_cut_pos_y:
 Tn_retrude:-20.00#-60
@@ -26,8 +26,8 @@ clean_right_pos_x:210#170#铁氟龙擦嘴的右位置
 clean_right_pos_y:305.5#304#306#380
 clean_velocity:6000
 cut_velocity:7000
-extrude_pos_x:185#127#48.0#127
-extrude_pos_y:305.5#304#220.0#380
+extrude_pos_x:185.5#127
+extrude_pos_y:304.5#304
 box_first_clean_length:140
 box_need_clean_length:140
 box_need_clean_length_max:140
@@ -69,6 +69,11 @@ gcode:
   BOX_EXTRUDER_EXTRUDE
   BOX_MATERIAL_FLUSH
   RESTORE_POSITION
+  M104 S{EXTRUDER_TEMP}
+  M140 S{BED_TEMP}
+  M109 S{EXTRUDER_TEMP}
+  M190 S{BED_TEMP}
+  
 
 [gcode_macro BOX_LOAD_MATERIAL_WITHOUT_MATERIAL]
 gcode:
@@ -77,6 +82,10 @@ gcode:
   BOX_EXTRUDE_MATERIAL
   BOX_EXTRUDER_EXTRUDE
   BOX_MATERIAL_FLUSH
+  M104 S{EXTRUDER_TEMP}
+  M140 S{BED_TEMP}
+  M109 S{EXTRUDER_TEMP}
+  M190 S{BED_TEMP}
 
 [gcode_macro BOX_QUIT_MATERIAL]
 gcode:
